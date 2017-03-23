@@ -1,0 +1,16 @@
+#Locale
+
+# Deployer user
+deploy_user: 'deploy'
+deploy_password: '123123'
+
+
+# Allowed SSH keys
+ssh_authorized_keys:
+  - /home/toni/.ssh/id_rsa.pub
+
+
+# DB vars
+db_username: 'astro_deploy'
+db_password: 'wrxMLQuobWOi3aGOHUAs1Q'
+db_name: 'astro_db_production'

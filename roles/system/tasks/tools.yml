@@ -1,0 +1,62 @@
+- name: Install Tools
+  apt: name={{ item }} state=latest update_cache=true
+  with_items:
+    - build-essential
+    - tmux
+    - vim
+    - htop
+    - git-core
+    - wget
+    - zlib1g-dev
+    - libssl-dev
+    - libreadline-dev
+    - libyaml-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libffi-dev
+    - curl
+    - libcurl3
+    - libcurl3-gnutls
+    - libcurl4-openssl-dev
+    - rng-tools # Pool of random numbers
+    - nginx
+
+- name: which rvm
+  shell: type /usr/local/rvm/bin/rvm
+  register: hasRVM
+  ignore_errors: yes
+- name: which node
+  shell: which node
+  register: hasNode
+  ignore_errors: yes
+- name: which bundle
+  become_user: "{{ deploy_user }}"
+  shell: bash -lc "which bundle"
+  register: hasBundler
+  ignore_errors: yes
+
+  #- name: which rvm2
+  #  shell: which rvm
+  #  register: whichRVM
+  #  ignore_errors: yes
+
+- name: Add RVM key and install
+  raw: "{{ item }}"
+  with_items:
+    - " gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3"
+    - "curl -sSL https://get.rvm.io | bash -s stable --ruby"
+    - "source /usr/local/rvm/scripts/rvm"
+  when: hasRVM.stdout.find('not found') > -1
+
+
+- name: install Bundler
+  become_user: "{{ deploy_user }}"
+  shell: bash -lc 'gem install bundler'
+  when: hasBundler.stdout == ""
+
+- name: Add NodeJS repo
+  raw: "{{ item }}"
+  with_items:
+    - "curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -"
+    - "apt-get update && apt-get install -y nodejs"
+  when: hasNode.stdout == ""

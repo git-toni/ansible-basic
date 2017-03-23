@@ -1,0 +1,59 @@
+---
+- name: get linux release
+  raw: lsb_release -c | cut -f2 | xargs echo -n
+  register: release_name
+  ignore_errors: yes
+ 
+- debug:
+    msg: " linux release is {{ release_name.stdout }}"
+- name: Add repository
+  apt_repository:
+    repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ release_name.stdout }}-pgdg main
+    state: present
+
+- name: Add key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Install postgres 9.6
+  apt: name={{ item }} state=latest update_cache=true
+  with_items:
+    - postgresql-9.6
+    - postgresql-contrib-9.6
+    - libpq-dev
+    - python-psycopg2
+
+- name: Create DB user
+  become: true
+  become_user: postgres
+  postgresql_user:
+    name: "{{ db_username }}"
+    password: "{{ db_password }}"
+    role_attr_flags: CREATEDB,CREATEROLE,REPLICATION
+
+- name: Create DB
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_username }}"
+    encoding: UTF-8
+
+- name: Add DB Extensions
+  become: true
+  become_user: postgres
+  postgresql_ext:
+    db: "{{ db_name }}"
+    name: "{{ item }}"
+  with_items:
+    - hstore
+
+- name: Make user md5 loggable
+  lineinfile:
+    dest: /etc/postgresql/9.6/main/pg_hba.conf
+    insertafter: '^local(.*)all(.*)postgres(.*)peer$'
+    line: "local  all  {{ db_username }} md5"
+    state: present
+- name: Restart PG
+  service: name=postgresql state=restarted

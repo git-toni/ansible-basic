@@ -1,0 +1,7 @@
+- name: Restart-sshd
+  remote_user: root
+  #become: true
+  #become_user: root
+  service: name=ssh state=restarted
+- debug:
+    msg: "hola restarting"

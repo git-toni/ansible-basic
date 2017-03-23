@@ -1,0 +1,39 @@
+# Install python and aptitude on the target machines (apt-get install python aptitude)
+# Copy ssh public key to machines (ssh-copy-id user@host)
+---
+- name: Install Rails Server
+  hosts: webserver
+  # After initial provisioning, use deploy instead of root
+  remote_user: root
+  gather_facts: False # don't gather facts because /usr/bin/python isn't set
+  pre_tasks:
+    - name: Deploy user exists
+      raw: getent passwd "{{ deploy_user }}"
+      register: userData
+      ignore_errors: yes
+
+    - name: Install python for Ansible
+      #remote_user: root
+      raw: type /usr/bin/python || (apt -y update && apt install -y python)
+      when: userData.stdout == ""
+    - name: Create user
+      #remote_user: root
+      include_role:
+        name: deploy-user
+      when: userData.stdout == ""
+    - setup: # aka gather_facts
+
+  roles:
+    #- deploy-user
+    - system
+    - postgres
+    - redis
+  # - mysql
+  # - nginx
+  # - certbot
+  # - ruby
+  # - rails
+  # - monit
+  # - memcached
+  # - redis
+  #- elasticsearch

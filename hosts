@@ -1,0 +1,7 @@
+[webserver]
+#45.76.84.207 
+#45.32.156.155 ansible_user="{{ deploy_user }}" ansible_sudo_pass="{{ deploy_password }}"
+#45.32.153.162
+#45.76.81.173 ansible_user="{{ deploy_user }}" ansible_sudo_pass="{{ deploy_password }}"
+#45.76.81.173
+45.76.94.69

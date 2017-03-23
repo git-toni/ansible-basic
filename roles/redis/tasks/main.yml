@@ -1,0 +1,23 @@
+---
+- raw: which redis-server
+  register: hasRedis
+  ignore_errors: yes
+
+- name: Creates Redis DL directory
+  file: path=/tmp/redis state=directory
+
+- name: DL and untar Redis
+  unarchive:
+    src: http://download.redis.io/redis-stable.tar.gz
+    remote_src: True
+    dest: /tmp/redis
+    creates: /usr/local/bin/redis-server
+    #when: hasRedis.stdout == ""
+
+- name: Compile and install Redis
+  shell: "make && make install"
+  args:
+    chdir: /tmp/redis/redis-stable
+    creates: /usr/local/bin/redis-server
+
+

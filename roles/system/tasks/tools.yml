@@ -20,6 +20,7 @@
     - libcurl4-openssl-dev
     - rng-tools # Pool of random numbers
     - nginx
+    - letsencrypt
 
 - name: which rvm
   shell: type /usr/local/rvm/bin/rvm
